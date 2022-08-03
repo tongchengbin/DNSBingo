@@ -35,13 +35,10 @@ func SetDns(token string, data DnsInfo) {
 func GetDns(token string) []DnsInfo {
 	rw.RLock()
 	if DnsMap[token] != nil {
-		return DnsMap[token]
+		data := DnsMap[token]
+		rw.RUnlock()
+		return data
 	}
 	rw.RUnlock()
 	return []DnsInfo{}
-}
-
-func ClearDns(token string) {
-	DnsMap[token] = []DnsInfo{}
-	DnsMap["other"] = []DnsInfo{}
 }

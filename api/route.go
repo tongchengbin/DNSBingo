@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -20,6 +21,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func getRecords(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL.String())
 	key := r.URL.Query().Get("domain")
 	data, _ := json.Marshal(store.GetDns(key))
 	fmt.Fprintf(w, string(data))

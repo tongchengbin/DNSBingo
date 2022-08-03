@@ -53,6 +53,7 @@ func serverDNS(addr *net.UDPAddr, conn *net.UDPConn, msg dnsmessage.Message) {
 	ds := strings.Split(subDomain, ".")
 	key := ds[len(ds)-1]
 	if strings.Contains(queryNameStr, config.Domain) {
+		log.Println("LOOKUP :", queryNameStr)
 		store.SetDns(key, store.DnsInfo{
 			Domain:    queryNameStr,
 			Subdomain: subDomain,
