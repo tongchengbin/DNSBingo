@@ -1,3 +1,3 @@
 .idea/
-.gitreleaser.yaml
+.goreleaser.yaml
 dist/
