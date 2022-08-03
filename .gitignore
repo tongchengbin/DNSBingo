@@ -1,4 +1,4 @@
 .idea/
 .goreleaser.yaml
 dist/
-go.mod
+go.sum
