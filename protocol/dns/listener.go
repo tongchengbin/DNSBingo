@@ -48,18 +48,23 @@ func serverDNS(addr *net.UDPAddr, conn *net.UDPConn, msg dnsmessage.Message) {
 
 	//域名过滤
 	queryNameStr = strings.TrimRight(queryNameStr, ".")
-	subDomain := queryNameStr[:len(queryNameStr)-len(config.Domain)]
-	subDomain = strings.TrimRight(subDomain, ".")
-	ds := strings.Split(subDomain, ".")
-	key := ds[len(ds)-1]
-	if strings.Contains(queryNameStr, config.Domain) {
-		log.Println("LOOKUP :", queryNameStr)
-		store.SetDns(key, store.DnsInfo{
-			Domain:    queryNameStr,
-			Subdomain: subDomain,
-			Address:   addr.IP.String(),
-			Time:      time.Now().Unix(),
-		})
+	subNameLen := len(queryNameStr) - len(config.Domain)
+	if subNameLen < 0 {
+		log.Println("GET ERROR DNS ", queryNameStr)
+	} else {
+		subDomain := queryNameStr[:subNameLen]
+		subDomain = strings.TrimRight(subDomain, ".")
+		ds := strings.Split(subDomain, ".")
+		key := ds[len(ds)-1]
+		if strings.Contains(queryNameStr, config.Domain) {
+			log.Println("LOOKUP :", queryNameStr)
+			store.SetDns(key, store.DnsInfo{
+				Domain:    queryNameStr,
+				Subdomain: subDomain,
+				Address:   addr.IP.String(),
+				Time:      time.Now().Unix(),
+			})
+		}
 	}
 	switch queryType {
 	case dnsmessage.TypeA:
