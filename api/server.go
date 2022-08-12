@@ -2,24 +2,21 @@ package api
 
 import (
 	"DnsLog/config"
-	"embed"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
 )
 
-//go:embed template
-var template embed.FS
-
-func ListingHttpManagementServer() {
+func ListingHttpManagementServer(options *config.Options) {
 	mux := http.NewServeMux()
-	//mux.Handle("/template/", http.FileServer(http.FS(template)))
-	//mux.HandleFunc("/", index)
-	mux.HandleFunc("/api/getDomain", getDomain)
-	mux.HandleFunc("/api/getRecords", getRecords)
-	log.Println("API Listing Start...")
+	mux.HandleFunc("/api/register", register)
+	mux.HandleFunc("/api/records", getRecords)
+	mux.HandleFunc("/java/", getJavaClass)
+	mux.HandleFunc("/jndi/register", registerJNDIClass)
+	logrus.Infof("API Listing Start on :%d", config.OptionsConfig.ManagePort)
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.Port),
+		Addr:    fmt.Sprintf(":%d", options.ManagePort),
 		Handler: mux,
 	}
 	if err := server.ListenAndServe(); err != nil {

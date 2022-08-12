@@ -1,27 +1,32 @@
-package Dns
+package protocol
 
 import (
 	"DnsLog/config"
 	"DnsLog/store"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/dns/dnsmessage"
 	"log"
 	"net"
 	"strings"
-	"sync"
 	"time"
 )
 
-var rw sync.RWMutex
+type DnsInfo struct {
+	Domain    string `json:"domain"`
+	Subdomain string `json:"sub_domain"`
+	Address   string `json:"host"`
+	Time      int64  `json:"time"`
+}
 
 // ListingDnsServer 监听dns端口
-func ListingDnsServer() {
-	conn, err := net.ListenUDP("udp", &net.UDPAddr{Port: 53})
+func ListingDnsServer(options *config.Options) {
+	conn, err := net.ListenUDP("udp", &net.UDPAddr{Port: options.DNSPort})
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	defer conn.Close()
-	log.Println("DNS Listing Start...")
+	logrus.Infof("DNS Listing Start On %d", options.DNSPort)
 	for {
 		buf := make([]byte, 512)
 		_, addr, _ := conn.ReadFromUDP(buf)
@@ -30,11 +35,11 @@ func ListingDnsServer() {
 			fmt.Println(err)
 			continue
 		}
-		go serverDNS(addr, conn, msg)
+		go serverDNS(options, addr, conn, msg)
 	}
 }
 
-func serverDNS(addr *net.UDPAddr, conn *net.UDPConn, msg dnsmessage.Message) {
+func serverDNS(options *config.Options, addr *net.UDPAddr, conn *net.UDPConn, msg dnsmessage.Message) {
 	if len(msg.Questions) < 1 {
 		return
 	}
@@ -45,10 +50,10 @@ func serverDNS(addr *net.UDPAddr, conn *net.UDPConn, msg dnsmessage.Message) {
 		queryName, _ = dnsmessage.NewName(queryNameStr)
 		resource     dnsmessage.Resource
 	)
-
 	//域名过滤
 	queryNameStr = strings.TrimRight(queryNameStr, ".")
-	subNameLen := len(queryNameStr) - len(config.Domain)
+	logrus.Infof("DNS LOG %s", queryNameStr)
+	subNameLen := len(queryNameStr) - len(options.Domain)
 	if subNameLen < 0 {
 		log.Println("GET ERROR DNS ", queryNameStr)
 	} else {
@@ -56,9 +61,9 @@ func serverDNS(addr *net.UDPAddr, conn *net.UDPConn, msg dnsmessage.Message) {
 		subDomain = strings.TrimRight(subDomain, ".")
 		ds := strings.Split(subDomain, ".")
 		key := ds[len(ds)-1]
-		if strings.Contains(queryNameStr, config.Domain) {
-			log.Println("LOOKUP :", queryNameStr)
-			store.SetDns(key, store.DnsInfo{
+		if strings.Contains(queryNameStr, options.Domain) {
+			logrus.Infof("LOOKUP :", queryNameStr)
+			store.SetData(key, DnsInfo{
 				Domain:    queryNameStr,
 				Subdomain: subDomain,
 				Address:   addr.IP.String(),
