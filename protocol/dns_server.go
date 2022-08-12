@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/dns/dnsmessage"
-	"log"
 	"net"
 	"strings"
 	"time"
@@ -23,7 +22,7 @@ type DnsInfo struct {
 func ListingDnsServer(options *config.Options) {
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{Port: options.DNSPort})
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Fatal(err.Error())
 	}
 	defer conn.Close()
 	logrus.Infof("DNS Listing Start On %d", options.DNSPort)
@@ -55,14 +54,14 @@ func serverDNS(options *config.Options, addr *net.UDPAddr, conn *net.UDPConn, ms
 	logrus.Infof("DNS LOG %s", queryNameStr)
 	subNameLen := len(queryNameStr) - len(options.Domain)
 	if subNameLen < 0 {
-		log.Println("GET ERROR DNS ", queryNameStr)
+		logrus.Warnf("GET ERROR DNS %s", queryNameStr)
 	} else {
 		subDomain := queryNameStr[:subNameLen]
 		subDomain = strings.TrimRight(subDomain, ".")
 		ds := strings.Split(subDomain, ".")
 		key := ds[len(ds)-1]
 		if strings.Contains(queryNameStr, options.Domain) {
-			logrus.Infof("LOOKUP :", queryNameStr)
+			logrus.Infof("NSLOOK:%s", queryNameStr)
 			store.SetData(key, DnsInfo{
 				Domain:    queryNameStr,
 				Subdomain: subDomain,

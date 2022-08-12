@@ -15,6 +15,7 @@ import (
 func initLogging() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true})
 	log.SetOutput(colorable.NewColorableStdout())
+
 }
 
 func main() {

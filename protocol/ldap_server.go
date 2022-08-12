@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	ldapMessage "github.com/lor00x/goldap/message"
+	"github.com/mattn/go-colorable"
 	"github.com/sirupsen/logrus"
 	ldap "github.com/vjeantet/ldapserver"
 	"strings"
@@ -14,6 +15,8 @@ import (
 
 func init() {
 	ldap.Logger = ldap.DiscardingLogger
+	logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+	logrus.SetOutput(colorable.NewColorableStdout())
 }
 
 // LDAPServer is a ldap server instance

@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -26,7 +25,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func getRecords(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.String())
+	logrus.Infof("URL :%s", r.URL.String())
 	key := r.URL.Query().Get("domain")
 	res, has := store.GetData(key)
 	if has {
@@ -112,7 +111,6 @@ func getJavaClass(w http.ResponseWriter, r *http.Request) {
 	//unixCmd := "whoami"
 	s = bytes.Replace(s, []byte(winOld), []byte(winCmd), 1)
 	s = bytes.Replace(s, []byte(unixOld), []byte(unixCmd), 1)
-	print(string(s))
 	n, err := w.Write(s)
 	if err != nil {
 		fmt.Printf("n=%d err:%v\n", n, err)
