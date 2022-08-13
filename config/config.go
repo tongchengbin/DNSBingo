@@ -1,5 +1,9 @@
 package config
 
+import (
+	"DnsLog/store"
+)
+
 type CLIServerOptions struct {
 	Domain     string
 	ManagePort int
@@ -20,6 +24,7 @@ type Options struct {
 	ListenIP string
 	LdapPort int
 	DNSPort  int
+	Storage  *store.Storage
 }
 
 func (cliServerOptions *CLIServerOptions) AsServerOptions() *Options {

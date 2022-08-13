@@ -3,6 +3,7 @@ package protocol
 import (
 	"DnsLog/config"
 	"DnsLog/store"
+	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/dns/dnsmessage"
@@ -62,12 +63,18 @@ func serverDNS(options *config.Options, addr *net.UDPAddr, conn *net.UDPConn, ms
 		key := ds[len(ds)-1]
 		if strings.Contains(queryNameStr, options.Domain) {
 			logrus.Infof("NSLOOK:%s", queryNameStr)
-			store.SetData(key, DnsInfo{
+			item, _ := json.Marshal(DnsInfo{
 				Domain:    queryNameStr,
 				Subdomain: subDomain,
 				Address:   addr.IP.String(),
 				Time:      time.Now().Unix(),
 			})
+			logrus.Infof("DNS SET %s %s", key, item)
+			err := store.Store.SetItem(key, string(item))
+			if err != nil {
+				logrus.Warnf(err.Error())
+				return
+			}
 		}
 	}
 	switch queryType {
